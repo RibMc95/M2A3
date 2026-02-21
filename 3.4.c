@@ -1,0 +1,40 @@
+#include <stdio.h>
+#include <stddef.h>
+#include <pthread.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/wait.h>
+
+void *worker(void *arg)
+{
+    int *data = (int *)arg;
+    *data = *data + 1;
+    printf("Data is %d\n", *data);
+    return (void *)42;
+}
+
+int data;
+int main()
+{
+    int status;
+    data = 0;
+    pthread_t thread;
+    pid_t pid = fork();
+    if (pid == 0)
+    {
+        pthread_create(&thread, NULL, &worker, &data);
+        pthread_join(thread, NULL);
+    }
+    else
+    {
+        pthread_create(&thread, NULL, &worker, &data);
+        pthread_join(thread, NULL);
+        pthread_create(&thread, NULL, &worker, &data);
+        pthread_join(thread, NULL);
+        wait(&status);
+
+        return 0;
+    }
+}
